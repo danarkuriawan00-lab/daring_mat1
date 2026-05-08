@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Asesmen SDN 1 Gondang</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@900&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-blue: #0284c7;
+            --secondary-blue: #93c5fd;
+            --accent-green: #10b981;
+            --bg-gray: #f3f4f6;
+        }
+
+        body {
+            background-color: var(--bg-gray);
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 450px;
+            height: 100vh;
+            max-height: 850px;
+            background-color: #ffffff;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        @media (min-width: 640px) {
+            .app-container {
+                height: 90vh;
+                border-radius: 24px;
+            }
+        }
+
+        .font-sahabat {
+            font-family: 'Montserrat', sans-serif;
+            letter-spacing: 0.1em;
+            background: linear-gradient(to bottom, #1e293b, #334155);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(1px 1px 0px rgba(255,255,255,0.3));
+        }
+
+        .btn-masuk {
+            background-color: var(--accent-green);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .btn-masuk:hover {
+            background-color: #059669;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-nav {
+            background-color: var(--primary-blue);
+            border-radius: 12px;
+            color: white;
+            padding: 12px 24px;
+            font-weight: 600;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .option-item {
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 2px solid #e5e7eb;
+            background-color: #f9fafb;
+        }
+
+        .selected-option {
+            background-color: #dbeafe !important;
+            border-color: #3b82f6 !important;
+        }
+
+        #loading-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.9);
+            backdrop-filter: blur(4px);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            color: white;
+        }
+
+        .input-field {
+            background-color: #ffffff;
+            color: #1e293b;
+            text-align: center;
+            font-weight: bold;
+            padding: 14px;
+            border-radius: 12px;
+            width: 100%;
+            border: 2px solid #cbd5e1;
+            outline: none;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 200;
+            padding: 20px;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+        }
+
+        /* Running Text Styles */
+        .marquee-container {
+            width: 100%;
+            background-color: #1e293b;
+            color: #f1f5f9;
+            padding: 10px 0;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            z-index: 50;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-top: 2px solid var(--primary-blue);
+        }
+
+        .marquee-content {
+            display: inline-block;
+            white-space: nowrap;
+            animation: marquee 25s linear infinite;
+            padding-left: 100%;
+        }
+
+        @keyframes marquee {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(-100%, 0); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-container" id="app">
+    <div id="loading-overlay">
+        <div class="animate-spin rounded-full h-14 w-14 border-4 border-blue-400 border-t-transparent mb-4"></div>
+        <p class="font-bold text-lg">Memproses Data...</p>
+    </div>
+
+    <!-- Login Screen -->
+    <div id="login-screen" class="flex flex-col items-center justify-center h-full p-6 pb-16">
+        <div class="mb-6">
+            <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiUAgnz3M-C0b4aP4NCccOVpRTBjimetBgZhyphenhyphenkGcMIcG3YY7RhacnjOZFFonylLQGbQ0LQHR7n4cOk7XN8mDb9YmRrXgJi5q7yZCEEKpQ4CYuB9WaZLCNw35_qVPvcRTizOMvZXsYVqmAOSfxDv9bUmpB9z_-2G3ecR_C1CONgsQ5-5U5NA2B9rpU4zfJnZ/w200-h200/sdn%20gng%201.png" alt="Logo SDN 1 Gondang" class="w-28 h-28 object-contain">
+        </div>
+
+        <div class="text-center mb-8">
+            <h1 class="text-2xl font-bold text-gray-900 leading-tight uppercase">Selamat Datang</h1>
+            <h2 class="text-5xl font-black mb-2 font-sahabat uppercase">Sahabat</h2>
+            <p class="text-[10px] text-gray-600 font-medium tracking-widest uppercase text-center">
+                Sistem Asesmen Hasil Amanah Berprestasi Akurat & Terpercaya
+            </p>
+        </div>
+
+        <div class="w-full space-y-4">
+            <input type="text" id="name" placeholder="NAMA LENGKAP" class="input-field uppercase">
+            <input type="number" id="absen" placeholder="NOMOR ABSEN" class="input-field">
+            <button onclick="startExam()" class="w-full py-4 mt-2 rounded-xl btn-masuk text-white font-bold text-lg shadow-lg uppercase">
+                Mulai Ujian
+            </button>
+        </div>
+    </div>
+
+    <!-- Exam Screen -->
+    <div id="exam-screen" class="hidden flex flex-col h-full p-6 pb-16">
+        <div class="w-full bg-gray-200 rounded-full h-2 mb-6">
+            <div id="progress-bar" class="bg-blue-600 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+        </div>
+
+        <div class="flex justify-between items-center mb-6">
+            <span class="bg-blue-600 text-white px-3 py-1 rounded-full text-[10px] font-bold uppercase">
+                Soal <span id="current-number">1</span> / <span id="total-questions">0</span>
+            </span>
+            <span id="timer" class="text-gray-700 font-mono font-bold text-sm">00:00</span>
+        </div>
+        
+        <div class="flex-grow overflow-y-auto pr-1">
+            <div class="bg-blue-50 rounded-2xl p-5 mb-4 border-l-4 border-blue-600">
+                <div id="question-image-container" class="mb-4 hidden">
+                    <img id="question-image" src="" alt="Soal Gambar" class="w-full h-auto rounded-lg shadow-md border border-gray-200">
+                </div>
+                <p id="question-text" class="text-base font-bold text-gray-800 leading-relaxed">Memuat...</p>
+            </div>
+            <div id="options-container" class="space-y-3 pb-4"></div>
+        </div>
+
+        <div class="flex justify-between items-center mt-4 gap-3">
+            <button onclick="prevQuestion()" id="prev-btn" class="btn-nav flex-1 opacity-50" disabled>KEMBALI</button>
+            <button onclick="handleNext()" class="btn-nav flex-1" id="next-btn">LANJUT</button>
+        </div>
+    </div>
+
+    <!-- Running Text Footer -->
+    <div class="marquee-container">
+        <div class="marquee-content">
+            Selamat Mengerjakan Ujian • Jujur adalah Kunci Kesuksesan • SDN 1 Gondang: Cerdas, Berkarakter, Berprestasi • Teliti Kembali Jawaban Anda Sebelum Dikirim • Semangat Sahabat! • Kelas 5 B Is The Best •&nbsp;
+            Selamat Mengerjakan Ujian • Jujur adalah Kunci Kesuksesan • SDN 1 Gondang: Cerdas, Berkarakter, Berprestasi • Teliti Kembali Jawaban Anda Sebelum Dikirim • Semangat Sahabat! • Kelas 5 B Is The Best
+        </div>
+    </div>
+</div>
+
+<div id="confirm-modal" class="modal-overlay">
+    <div class="modal-content">
+        <h3 class="text-xl font-bold mb-2">Selesai?</h3>
+        <p id="modal-msg" class="text-sm text-gray-600 mb-6">Pastikan semua jawaban sudah terisi.</p>
+        <div class="flex gap-3">
+            <button onclick="hideConfirm()" class="flex-1 py-3 border border-gray-300 rounded-xl font-bold text-gray-500">BATAL</button>
+            <button onclick="finishExam()" class="flex-1 py-3 bg-green-500 text-white rounded-xl font-bold">KIRIM</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbz1sq6Ks2rC3lIdcA3i9TRLPebUdny0st73zmcZXI7HVVSZ63hxJWsz3_rVOH3L0gdO/exec'; 
+
+    const questions = [
+        {
+            type: "pilihan-ganda",
+            gambar: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgepV1jLoyUOvTGrPNylIaWqRsBBhqsOBgzTOzo_D3zKIlNv3-AjciOsl9IYCPXiQVWPvmfGbO5KnJ_FSSTsBHlNRFzHKiq5ZcoZ2mxw4G14mW6_DVzKz3SY3SL4iAFg1xi4Br-PR6_zbIyBXJeH6bKNEve7GiBNO8PNFEovvGXElK99_fpHbdWw9QwW_Ye/s320/Gemini_Generated_Image_oiygn1oiygn1oiyg.png",
+            text: "Siapakah siswa yang memiliki tubuh paling tinggi berdasarkan data tersebut?",
+            opsi: ["Ali", "Budi", "Dedi", "Eli"],
+            jawaban: "Eli" 
+        },
+        {
+            type: "pilihan-ganda",
+            gambar: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEj73U5MFW9eMqEANP0YAnTQTuEgR8nuozCNltlQiWqQryVxLFwjhlf_bERfGvQj0f9ocwIrXo5NxbWH-fHCdgYOinTsE-sxQfFKoHgT8Tb1Gl34iBIzi5msiuBwEVOLXVIgnk1C4qKboIVQ_beYNwiMBXRLzzvMSYsf1d4YMtMUKoVpGWXguxx2d5psVd-F/s320/Gemini_Generated_Image_5n9a0e5n9a0e5n9a.png",
+            text: "Penurunan jumlah pengunjung perpustakaan terjadi pada bulan ...",
+            opsi: ["Februari", "Maret", "April", "Januari"],
+            jawaban: "Maret"
+        },
+        {
+            type: "pilihan-ganda",
+            gambar: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiu0aiLTAjwUZ_rS7Y0gl3GQBuvFS7mxsH-MyLnTwQHB7e2L_JIfkKaIW9u3OpH8SU0LpFwXL0pfyMDMViXABQDFgtqtqDDbDIClBwdv1GzwLwZgHlbJAX2VeJmCOoPW0NpwfaCF1sPH38nRNLrMSfmE04V4C4Wo_Ao0Ul6RFvuDJkYarBEiwP9jM0NwKjj/s320/Gemini_Generated_Image_5ind2x5ind2x5ind.png",
+            text: "Berapakah jumlah seluruh siswa yang didata hobinya?",
+            opsi: ["20 anak", "25 anak", "30 anak", "15 anak"],
+            jawaban: "30 anak"
+        },
+        {
+            type: "pilihan-ganda",
+            gambar: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjbIIZQLnImngzIN8TYTQgJC7kDqtbllp-u1GSzaRtLcnrN5KpOT7gDlOTB3zppNtR8qsSfTdU6tyn-qjGyvZqIrne2u1iPKX1gJw46fvugJObH1BVSGwPIQT9TZel13xWjT5aqF75CY_7yhz0CKeFqutwE0BRND8RLRC41K2IRwqmSBCdhdyDV8PERekTp/s320/Gemini_Generated_Image_ujl9skujl9skujl9.png",
+            text: "Selisih stok buah Jeruk dan Mangga adalah ...",
+            opsi: ["10 kg", "15 kg", "20 kg", "25 kg"],
+            jawaban: "10 kg"
+        },
+        {
+            type: "pilihan-ganda",
+            gambar: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhm68Zmlo4xnHvj5CmaaIzITFcEZcDcutwmno1arksMW0VRKzDWFAjx4K0X2-P_P91Fh7SzqRfQwU398AUbSF2aXDMgn1jlGF1zrRssYyfRCPTkfMkH3xaJ_VfftmQKZtUFQeH9In00soz2AjHeH_uojDB_tB-D_s-YncPH69dpgdSf1J31elMH7SaDrsrP/s320/Gemini_Generated_Image_ghi9oaghi9oaghi9.png",
+            text: "Berapa jumlah siswa yang memiliki berat badan 32 kg?",
+            opsi: ["2 anak", "4 anak", "5 anak", "7 anak"],
+            jawaban: "5 anak"
+        },
+        {
+            type: "pilihan-ganda",
+            gambar: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjgybiKjuFC-n-w1aiqRSG0J_HeRoCIP6zIC-i_m9hoWPU6_q1xUbOk2_0DS4LR1LTp93zJBxJwikJ6HIXUKBNFVmoYYqMxamjAfnUSLDC9xZY0D27ROss0A30rNXlNtlS2J3rJIiRef4w2PZowPMiPxODAiGwxpqEgLTqEhHhdNYZ6MoFnZLjzPy2zS0fG/s320/Gemini_Generated_Image_mnzrtamnzrtamnzr.png",
+            text: "Hasil panen Desa A adalah ...",
+            opsi: ["3 kg", "30 kg", "300 kg", "3.000 kg"],
+            jawaban: "300 kg"
+        },
+        {
+            type: "pilihan-ganda",
+            gambar: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEht6K9wWgGRAQ4JGYd8zcAem7HqaeuDW7GsSFknC3GInBfahiKGZP1aG4lC0RINbNW5BfP6yJzoLb_TYKUbmtB64k7cZt9nqcerRgzxEUNOvJNMfOimhBe41Bt6Pi_mAPgk9sA5ECQlmsactQOOawwB3CL10pdZcSf5xYuWmEMCUnDQD-gZjFy4UE_axfAw/s320/Gemini_Generated_Image_pv8u1gpv8u1gpv8u.png",
+            text: "Berapa jumlah mobil di Lantai 2?",
+            opsi: ["4 mobil", "9 mobil", "20 mobil", "25 mobil"],
+            jawaban: "20 mobil"
+        },
+        {
+            type: "pilihan-ganda",
+            gambar: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhD3enHONTKLbfzHZ4JITL5RJ9VlKHYjZiWT79bcALYI42kkctCUmDKLWCk1TVUmePn2fMXIMtRPa5xrPZSMXTBnHPWQj7jKb-qeLaKBxHM6DmAEK6YQx7s-x6NtsECg-MdnxIu8LAZbU1nsRQU1oSlM-LS542Hmr7HvJh6GbqnMlEC0swT7ItBnj8chNfW/s320/Gemini_Generated_Image_i0k2c2i0k2c2i0k2.png",
+            text: "Selisih jumlah koleksi komik dan novel adalah ...",
+            opsi: ["4 buku", "40 buku", "60 buku", "80 buku"],
+            jawaban: "40 buku"
+        },
+        {
+            type: "pilihan-ganda",
+            gambar: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhUXd4xey2liUAD-35Wv3OsIJHKLJGKQhmBwd1lF7tMX0BYJvPBSh-oEAqSbsJdwErupAYNEgQZJC6NC3J1YWKLikgur3GRPCqF8A55C4wf7brJdCxa4SF18EOR-J3lcLJ3Uy2-DKADD0s8GCgiKwajVgtaUdw5aSqXDNhBG-ECU8uTdF99D0hkoUgpi3zT/s320/Gemini_Generated_Image_b9n9twb9n9twb9n9.png",
+            text: "Berapa buah donat rasa cokelat yang terjual?",
+            opsi: ["4 buah", "12 buah", "48 buah", "60 buah"],
+            jawaban: "48 buah"
+        }
+    ];
+
+    let currentQuestionIndex = 0;
+    let userAnswers = {};
+    let userData = { name: '', absen: '' };
+    let startTime;
+    let timerInterval;
+
+    function startExam() {
+        userData.name = document.getElementById('name').value.trim();
+        userData.absen = document.getElementById('absen').value.trim();
+
+        if (!userData.name || !userData.absen) {
+            alertCustom("Harap isi Nama dan Nomor Absen!");
+            return;
+        }
+
+        document.getElementById('login-screen').classList.add('hidden');
+        document.getElementById('exam-screen').classList.remove('hidden');
+        document.getElementById('total-questions').innerText = questions.length;
+        
+        startTime = new Date();
+        timerInterval = setInterval(updateTimer, 1000);
+        renderQuestion();
+    }
+
+    function alertCustom(msg) {
+        const div = document.createElement('div');
+        div.className = "fixed top-10 left-1/2 -translate-x-1/2 bg-red-600 text-white px-6 py-3 rounded-full z-[300] shadow-xl font-bold animate-bounce text-center";
+        div.innerText = msg;
+        document.body.appendChild(div);
+        setTimeout(() => div.remove(), 3000);
+    }
+
+    function updateTimer() {
+        const diff = Math.floor((new Date() - startTime) / 1000);
+        const m = Math.floor(diff / 60).toString().padStart(2, '0');
+        const s = (diff % 60).toString().padStart(2, '0');
+        document.getElementById('timer').innerText = `${m}:${s}`;
+    }
+
+    function renderQuestion() {
+        const q = questions[currentQuestionIndex];
+        const container = document.getElementById('options-container');
+        const imgContainer = document.getElementById('question-image-container');
+        const imgElement = document.getElementById('question-image');
+        
+        document.getElementById('current-number').innerText = currentQuestionIndex + 1;
+        document.getElementById('question-text').innerText = q.text;
+        document.getElementById('progress-bar').style.width = `${((currentQuestionIndex + 1) / questions.length) * 100}%`;
+
+        if (q.gambar) {
+            imgElement.src = q.gambar;
+            imgContainer.classList.remove('hidden');
+        } else {
+            imgContainer.classList.add('hidden');
+        }
+
+        container.innerHTML = '';
+        q.opsi.forEach((opt, i) => {
+            const isSelected = userAnswers[currentQuestionIndex] === opt;
+            const div = document.createElement('div');
+            div.className = `option-item p-4 rounded-xl font-medium flex items-center shadow-sm ${isSelected ? 'selected-option' : ''}`;
+            div.innerHTML = `
+                <div class="w-7 h-7 rounded-full flex items-center justify-center mr-3 text-xs font-bold ${isSelected ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-600'}">
+                    ${String.fromCharCode(65 + i)}
+                </div>
+                <span class="text-sm">${opt}</span>
+            `;
+            div.onclick = () => { 
+                userAnswers[currentQuestionIndex] = opt; 
+                renderQuestion(); 
+            };
+            container.appendChild(div);
+        });
+
+        document.getElementById('prev-btn').disabled = currentQuestionIndex === 0;
+        document.getElementById('prev-btn').style.opacity = currentQuestionIndex === 0 ? '0.5' : '1';
+        document.getElementById('next-btn').innerText = currentQuestionIndex === questions.length - 1 ? "SELESAI" : "LANJUT";
+    }
+
+    function handleNext() {
+        if (currentQuestionIndex < questions.length - 1) {
+            currentQuestionIndex++;
+            renderQuestion();
+        } else {
+            showConfirm();
+        }
+    }
+
+    function prevQuestion() {
+        if (currentQuestionIndex > 0) {
+            currentQuestionIndex--;
+            renderQuestion();
+        }
+    }
+
+    function showConfirm() {
+        const answered = Object.keys(userAnswers).length;
+        const msg = answered < questions.length 
+            ? `Kamu baru mengerjakan ${answered} dari ${questions.length} soal. Yakin ingin mengirim?` 
+            : `Semua soal sudah terjawab. Kirim sekarang?`;
+        
+        document.getElementById('modal-msg').innerText = msg;
+        document.getElementById('confirm-modal').style.display = 'flex'; 
+    }
+
+    function hideConfirm() { 
+        document.getElementById('confirm-modal').style.display = 'none'; 
+    }
+
+    async function finishExam() {
+        hideConfirm();
+        clearInterval(timerInterval);
+        document.getElementById('loading-overlay').style.display = 'flex';
+
+        let correct = 0;
+        questions.forEach((q, i) => {
+            if (userAnswers[i] === q.jawaban) correct++;
+        });
+
+        const score = Math.round((correct / questions.length) * 100);
+
+        const payload = new URLSearchParams();
+        payload.append('timestamp', new Date().toLocaleString('id-ID'));
+        payload.append('nama', userData.name);
+        payload.append('absen', userData.absen);
+        payload.append('skor', score);
+        payload.append('durasi', document.getElementById('timer').innerText);
+
+        try {
+            await fetch(scriptURL, { method: 'POST', mode: 'no-cors', body: payload });
+            showResult(score, correct);
+        } catch (e) {
+            showResult(score, correct);
+        } finally {
+            document.getElementById('loading-overlay').style.display = 'none';
+        }
+    }
+
+    function showResult(score, correct) {
+        document.getElementById('exam-screen').innerHTML = `
+            <div class="flex flex-col items-center justify-center text-center h-full py-6">
+                <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
+                    <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                </div>
+                <h1 class="text-xl font-black mb-1">UJIAN SELESAI</h1>
+                <p class="text-xs text-gray-500 mb-6">${userData.name} - Absen ${userData.absen}</p>
+                
+                <div class="text-6xl font-black text-blue-600 mb-6">${score}</div>
+
+                <div class="grid grid-cols-2 gap-3 w-full mb-6">
+                    <div class="bg-gray-50 p-3 rounded-xl border border-gray-100">
+                        <div class="text-[10px] text-gray-400">Benar</div>
+                        <div class="text-lg font-bold text-green-600">${correct}</div>
+                    </div>
+                    <div class="bg-gray-50 p-3 rounded-xl border border-gray-100">
+                        <div class="text-[10px] text-gray-400">Salah</div>
+                        <div class="text-lg font-bold text-red-500">${questions.length - correct}</div>
+                    </div>
+                </div>
+
+                <button onclick="location.reload()" class="btn-nav w-full py-3 uppercase">Kembali ke Awal</button>
+            </div>
+        `;
+    }
+</script>
+</body>
+</html>
